@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.xspec.QueryExpressionSpec;
 
 import java.util.Iterator;
 
@@ -46,7 +47,12 @@ public class notesQuery {
 
         //Build request: Query specification with Primary attributes/values to match desired item, but projects only "Notes" and "NoteId"
         // TODO 2 BEGIN
-        
+        QuerySpec querySpec = new QuerySpec().withKeyConditionExpression("UserId=:vUserId")
+                .withValueMap(new ValueMap()
+                .withString(":vUserId",userId))
+                .withProjectionExpression("NoteId, Note");
+
+        ItemCollection<QueryOutcome> items = table.query(querySpec);
         // TODO 2 END
 
         System.out.format(

@@ -14,11 +14,12 @@
 package dev.labs.dynamodb;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.api.PutItemApi;
+import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Map;
 
 public class notesLoadData {
 
@@ -38,9 +40,9 @@ public class notesLoadData {
         String tablename = config.getTableName();
 
         // TODO 0 BEGIN
-        
+        DynamoDB dynamoDB = new DynamoDB(Regions.US_EAST_1);
         // TODO 0 END
-        
+
         //Use Notes table as resource
         Table table = dynamoDB.getTable(tablename);
 
@@ -65,7 +67,9 @@ public class notesLoadData {
             //Load data into table
             try {
                 // TODO 1 BEGIN
-                
+                Item item = new Item().withPrimaryKey("UserId", userId, "NoteId", noteId)
+                        .withString("Note", note);
+                table.putItem(item);
                 // TODO 1 END
                 
                 System.out.println("PutItem succeeded: " + userId + " " + noteId + " " + note);
