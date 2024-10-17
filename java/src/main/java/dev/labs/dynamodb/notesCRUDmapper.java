@@ -36,7 +36,7 @@ public class notesCRUDmapper {
 
         // TODO 1 BEGIN
         // Define a DynamoDB mapper to associate to the instance of NotesItem class
-
+        DynamoDBMapper mapper = new DynamoDBMapper(client);
         // TODO 1 END
 
         testCRUDOperations(mapper);
@@ -49,29 +49,37 @@ public class notesCRUDmapper {
 
         // TODO 6 BEGIN
         // Instantiate NotesItem class to maps to the DynamoDB table. Definition of the class is partially provided to you
-        
+        NotesItems notesItems = new NotesItems();
         // TODO 6 END
 
         // TODO 7 BEGIN
         // Set attribute values to UserId, NoteId, and Note using class methods
-        
+
+        String userId = "test mapper";
+        notesItems.setUserId(userId);
+        int noteId = 011;
+        notesItems.setNoteId(noteId);
+        String note = "Aws Java SDK allows also using mapper.";
+        notesItems.setNotes(note);
         // TODO 7 END
 
         try {
             // TODO 8 BEGIN
             // Save the item (note) to Note Table.
-            
+            mapper.save(notesItems);
             // TODO 8 END
 
 
             // TODO 9 BEGIN
             // Retrieve the item from Notes
-            
+            NotesItems itemRetrieved = mapper.load(NotesItems.class, userId, noteId);
+
             // TODO 9 END
 
             // TODO 10 BEGIN
             // Update the item in Notes
-            
+            itemRetrieved.setNotes(note.concat("period"));
+            mapper.save(itemRetrieved);
             // TODO 10 END
 
             System.out.println("Item updated:");
@@ -83,13 +91,14 @@ public class notesCRUDmapper {
                     .withConsistentReads(DynamoDBMapperConfig.ConsistentReads.CONSISTENT)
                     .build();
 
-            NotesItems updatedItem = mapper.load(NotesItems.class, "testuser", 1, config);
+            NotesItems updatedItem = mapper.load(NotesItems.class, userId, noteId, config);
             System.out.println("Retrieved the previously updated item:");
             System.out.println(updatedItem);
 
             // TODO 11 BEGIN
             // Delete the item from Notes
-            
+            NotesItems deleteItem = updatedItem;
+            mapper.delete(updatedItem);
             // TODO 11 END
 
             System.out.println("deleting the previously existing item:");
@@ -136,7 +145,7 @@ public class notesCRUDmapper {
         expectedAttributes.put("Note", expectedAttributeValue);
         // TODO 12 BEGIN
         // Update item using withExpected expression
-        
+        mapper.save(item, new DynamoDBSaveExpression().withExpected(expectedAttributes));
         // TODO END
 
         NotesItems itemUpdated = mapper.load(NotesItems.class, "newbie", 1);
@@ -146,7 +155,7 @@ public class notesCRUDmapper {
 
     // TODO 2 BEGIN
     // Define DynamoDB Table annotation to maps NotesItems class to DynamoDB table name Notes
-    
+    @DynamoDBTable(tableName = "Notes")
     // TODO 2 END
     public static class NotesItems {
 
@@ -157,7 +166,7 @@ public class notesCRUDmapper {
 
         // TODO 3  BEGIN
         // Define the primary key annotation on the attribute UserId
-        
+        @DynamoDBHashKey(attributeName = "UserId")
         // TODO 3 END
         public String getUserId() {
             return this.UserId;
@@ -169,7 +178,7 @@ public class notesCRUDmapper {
 
         // TODO 4 BEGIN
         // Define the sort key annotation on the attribute NoteId
-        
+        @DynamoDBRangeKey(attributeName = "NoteId")
         // TODO 4 END
         public Integer getNoteId() {
             return this.NoteId;
@@ -181,7 +190,7 @@ public class notesCRUDmapper {
 
         // TODO 5 BEGIN
         // Define an optional attribute annotation for Note
-        
+        @DynamoDBAttribute(attributeName = "Note")
         // TODO 5 END
         public String getNotes() {
             return this.Note;

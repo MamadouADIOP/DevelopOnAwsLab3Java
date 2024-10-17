@@ -21,7 +21,6 @@ import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class notesScan {
 
@@ -52,14 +51,17 @@ public class notesScan {
         //Build Scan specification with Filter expression, Values, list of attributes to project
 
         // TODO 4 BEGIN
-        ScanSpec scanSpec = new ScanSpec().withFilterExpression("contains(Note,:vNote)").withValueMap(new ValueMap().withString(":vNote", searchText));
+        ScanSpec scanSpec = new ScanSpec()
+                .withFilterExpression("contains(Note,:vNote)")
+                .withValueMap(new ValueMap().withString(":vNote", searchText))
+                .withProjectionExpression("UserId, NoteId, Note");
         // TODO 4 END
 
         //Limit the response Page size
         // TODO 5 BEGIN
-        scanSpec.withMaxPageSize(15);
+        scanSpec.withMaxPageSize(1);
         // TODO 5 END
-        
+
         //Run scan table using above specifications
         ItemCollection<ScanOutcome> items = table.scan(scanSpec);
 
@@ -71,11 +73,11 @@ public class notesScan {
             System.out.println("\nPage: " + ++pageNum);
 
             // TODO 6 BEGIN
-             Iterator<Item> item = page.iterator();
+            Iterator<Item> item = page.iterator();
 
             // TODO 6 END
-            
-            
+
+
             while (item.hasNext()) {
                 System.out.println(item.next().toJSONPretty());
             }
